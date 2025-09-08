@@ -4,11 +4,9 @@ from sqlalchemy import update, select
 
 
 from app.core.security import get_password_hash, verify_password
-from app.schemas import (
-    UserCreate,
-    UserUpdate,
-)
-from app.db.models import User
+from app.schemas import UserCreate, UserUpdate, UserPublic
+from app.db.models import User, Resume
+from app.resume.resume_shemas import ResumeSchema
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -51,3 +49,13 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
+
+
+def create_resume(
+    *, session: Session, resume: ResumeSchema, user: UserPublic
+) -> Resume:
+    db_obj = Resume(title=resume.title, content=resume.content, user_id=user.id)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj

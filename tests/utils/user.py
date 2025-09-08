@@ -2,9 +2,9 @@ from httpx import AsyncClient
 from sqlalchemy.orm import Session
 
 from app.db import crud
-from app.schemas import UserUpdateMePassword, UserCreate
+from app.schemas import UserCreate
 from tests.utils.utils import random_email, random_lower_string
-
+from app.db.models import User
 
 async def user_authentication_headers(
     *, client: AsyncClient, email: str, password: str
@@ -18,7 +18,7 @@ async def user_authentication_headers(
     return headers
 
 
-def create_random_user(db: Session) -> UserUpdateMePassword:
+def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=email, password=password)

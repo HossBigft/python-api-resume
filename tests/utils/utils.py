@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db import crud
 from app.schemas import  UserCreate
+from app.db.models import User
 
 def random_lower_string() -> str:
     return "".join(random.choices(string.ascii_lowercase, k=32))
@@ -39,9 +40,9 @@ async def user_authentication_headers(
     return headers
 
 
-def create_random_user(db: Session) -> UserCreate:
+def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=email, password=password)
-    crud.create_user(session=db, user_create=user_in)
-    return user_in
+    user =crud.create_user(session=db, user_create=user_in)
+    return user
