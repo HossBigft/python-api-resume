@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.users import users_router as users
 from app.auth import auth_router as login
-
+from app.resume import resume_router as resume
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
@@ -31,6 +31,7 @@ api_router = APIRouter(prefix=settings.API_V1_STR)
 
 api_router.include_router(users.router)
 api_router.include_router(login.router)
+api_router.include_router(resume.router)
 
 app.include_router(api_router)
 
