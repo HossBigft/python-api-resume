@@ -1,0 +1,15 @@
+__pycache__
+app.egg-info
+*.pyc
+.mypy_cache
+.coverage
+htmlcov
+.cache
+.venv
+actions.log
+.gitsecret/keys/random_seed
+!*.secret
+.idea
+*.log
+log
+.env

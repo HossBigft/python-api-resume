@@ -1,0 +1,89 @@
+services:
+  db:
+    image: postgres:17
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - default
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DESIGN=pepa-linha-dark
+    ports:
+      - "8080:8080"
+
+  prestart:
+    build:
+      context: .
+    networks:
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    command: bash scripts/prestart.sh
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    environment:
+      - POSTGRES_SERVER=db
+      
+  backend:
+    restart: "no"
+    ports:
+      - "8000:8000"
+    networks:
+      - default
+    build:
+      context: .
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      prestart:
+        condition: service_completed_successfully
+    develop:
+      watch:
+        - path: .
+          action: sync
+          target: /app
+          ignore:
+            - ./.venv
+            - .venv
+        - path: ./pyproject.toml
+          action: rebuild
+    environment:
+      - POSTGRES_SERVER=db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health-check"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+volumes:
+  app-db-data:
+
