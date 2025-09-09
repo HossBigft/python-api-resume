@@ -14,7 +14,7 @@ async def test_create_resume(
     client: AsyncClient, normal_user_token_headers: dict[str, str], db: Session, normal_user: User
 ) -> None:
     resume = ResumeSchema(title=random_lower_string(), content=random_lower_string())
-    response =await client.post(
+    await client.post(
         "/resume/", headers=normal_user_token_headers, json=resume.model_dump()
     )
     resume_in_db: Resume = (

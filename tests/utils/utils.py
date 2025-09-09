@@ -42,8 +42,9 @@ async def user_authentication_headers(
     return headers
 
 
-def create_random_user(db: Session) -> User:
+def create_random_user(db: Session) -> UserCreate:
     email = random_email()
     password = random_lower_string()
     user = UserCreate(email=email, password=password)
-    return crud.create_user(session=db, user_create=user)
+    crud.create_user(session=db, user_create=user)
+    return user
