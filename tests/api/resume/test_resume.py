@@ -20,11 +20,12 @@ async def test_create_resume(
     await client.post(
         "/resume/", headers=normal_user_token_headers, json=resume.model_dump()
     )
-    resume_in_db: Resume = (
+    resume_in_db: Resume | None = (
         db.execute(select(Resume).where(Resume.user_id == normal_user.id))
         .scalars()
         .first()
     )
+    assert resume_in_db is not None
     assert resume_in_db.title == resume.title
     assert resume_in_db.content == resume.content
 
@@ -42,16 +43,17 @@ async def test_delete_resume(
     await client.post(
         "/resume/", headers=normal_user_token_headers, json=resume_data.model_dump()
     )
-    resume_before: Resume = (
+    resume_before: Resume | None = (
         db.execute(select(Resume).where(Resume.user_id == normal_user.id))
         .scalars()
         .first()
     )
+    assert resume_before is not None
 
     r = await client.delete(
         f"/resume/{resume_before.id}", headers=normal_user_token_headers
     )
-    resume_after: Resume = (
+    resume_after: Resume | None = (
         db.execute(select(Resume).where(Resume.id == resume_before.id))
         .scalars()
         .first()
