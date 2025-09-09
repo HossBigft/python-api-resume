@@ -1,7 +1,11 @@
+import uuid
+
 from fastapi import APIRouter
+
+
 from app.core.dependencies import CurrentUser, SessionDep
 from app.resume.resume_shemas import ResumeSchema
-from app.db.crud import create_resume
+from app.db.crud import create_resume, delete_resume
 
 router = APIRouter(tags=["resume"], prefix="/resume")
 
@@ -14,3 +18,9 @@ def add_resume(
     return "Resume added successfully"
 
 
+@router.delete("/{resume_id}")
+async def delete_resume_endpoint(
+    session: SessionDep, resume_id: uuid.UUID, current_user: CurrentUser
+) -> str:
+    delete_resume(session=session, resume_id=resume_id, db_user=current_user)
+    return "Resume deleted successfully"

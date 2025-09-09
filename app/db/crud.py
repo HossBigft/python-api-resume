@@ -61,7 +61,7 @@ def create_resume(*, session: Session, resume: ResumeSchema, db_user: User) -> R
     return db_obj
 
 
-def delete_resume(*, session: Session, resume_id: uuid.UUID, db_user: User) -> None:
+def delete_resume(*, session: Session, resume_id: uuid.UUID, db_user: UserPublic) -> None:
     stmt = delete(Resume).where(
         and_(Resume.id == resume_id, Resume.user_id == db_user.id)
     )
