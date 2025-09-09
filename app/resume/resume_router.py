@@ -11,7 +11,7 @@ router = APIRouter(tags=["resume"], prefix="/resume")
 
 
 @router.post("/")
-def add_resume(
+async def add_resume(
     session: SessionDep, resume: ResumeSchema, current_user: CurrentUser
 ) -> str:
     create_resume(session=session, resume=resume, db_user=current_user)
