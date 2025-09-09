@@ -57,7 +57,6 @@ def test_check_if_user_is_superuser(db: Session) -> None:
     user = crud.create_user(session=db, user_create=user_in)
 
 
-
 def test_check_if_user_is_superuser_normal_user(db: Session) -> None:
     username = random_email()
     password = random_lower_string()

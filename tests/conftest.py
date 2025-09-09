@@ -2,7 +2,7 @@ import pytest_asyncio
 
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.orm import Session
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from collections.abc import AsyncGenerator
 
 from app.core.config import settings
@@ -51,15 +51,18 @@ async def superuser_token_headers(client: AsyncClient) -> dict[str, str]:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def normal_user(db: Session) -> UserCreate:
-    user: UserCreate = create_random_user(db)
+async def normal_user(db: Session) -> User:
+    user: User = (
+        db.execute(select(User).where(User.is_superuser.is_(False))).scalars().first()
+    )
+    if not user:
+        create_random_user(db)
     return user
 
 
 @pytest_asyncio.fixture(scope="module")
-async def normal_user_token_headers(
-    client: AsyncClient, normal_user: UserCreate
-) -> dict[str, str]:
+async def normal_user_token_headers(client: AsyncClient, db: Session) -> dict[str, str]:
+    normal_user: UserCreate = create_random_user(db)
     return await user_authentication_headers(
         client=client, email=normal_user.email, password=normal_user.password
     )
