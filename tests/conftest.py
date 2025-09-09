@@ -10,7 +10,7 @@ from app.core.db import engine, init_db
 from app.main import app
 from app.schemas import UserCreate
 from app.db.models import User
-
+from app.db.crud import create_user
 from tests.utils.utils import (
     get_superuser_token_headers,
     create_random_user,
@@ -26,6 +26,12 @@ async def db() -> AsyncGenerator[Session, None]:
         statement = delete(User)
         session.execute(statement)
         session.commit()
+        user_in = UserCreate(
+            email=settings.FIRST_SUPERUSER,
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+            is_superuser=True,
+        )
+        create_user(session=session, user_create=user_in)
 
 
 @pytest_asyncio.fixture(scope="module")
