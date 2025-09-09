@@ -6,8 +6,9 @@ from app.core.config import settings
 from sqlalchemy.orm import Session
 
 from app.db import crud
-from app.schemas import  UserCreate
+from app.schemas import UserCreate
 from app.db.models import User
+
 
 def random_lower_string() -> str:
     return "".join(random.choices(string.ascii_lowercase, k=32))
@@ -28,6 +29,7 @@ async def get_superuser_token_headers(client: AsyncClient) -> dict[str, str]:
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers
 
+
 async def user_authentication_headers(
     *, client: AsyncClient, email: str, password: str
 ) -> dict[str, str]:
@@ -40,9 +42,8 @@ async def user_authentication_headers(
     return headers
 
 
-def create_random_user(db: Session) -> UserCreate:
+def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
     user = UserCreate(email=email, password=password)
-    crud.create_user(session=db, user_create=user)
-    return user
+    return crud.create_user(session=db, user_create=user)

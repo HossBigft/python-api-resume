@@ -56,7 +56,7 @@ async def normal_user(db: Session) -> User:
         db.execute(select(User).where(User.is_superuser.is_(False))).scalars().first()
     )
     if not user:
-        create_random_user(db)
+        user = create_random_user(db)
     return user
 
 
