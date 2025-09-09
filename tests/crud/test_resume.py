@@ -7,7 +7,7 @@ from app.db import crud
 from tests.utils.utils import random_lower_string, create_random_user
 from app.db.models import Resume, User
 from app.resume.resume_shemas import ResumeSchema
-
+from app.schemas import UserPublic
 
 def test_create_resume(db: Session) -> None:
     resume_title: str = random_lower_string()
@@ -16,7 +16,7 @@ def test_create_resume(db: Session) -> None:
         title=resume_title, content=resume_content
     )
     user: User = create_random_user(db)
-    crud.create_resume(session=db, resume=resume_schema, user=user)
+    crud.create_resume(session=db, resume=resume_schema, user=UserPublic.model_validate(user, from_attributes=True))
 
     resume_in_db: Resume = (
         db.execute(select(Resume).where(Resume.user_id == user.id)).scalars().first()
