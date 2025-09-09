@@ -53,7 +53,7 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_resume(*, session: Session, resume: ResumeSchema, db_user: User) -> Resume:
+def create_resume(*, session: Session, resume: ResumeSchema, db_user: UserPublic) -> Resume:
     db_obj = Resume(title=resume.title, content=resume.content, user_id=db_user.id)
     session.add(db_obj)
     session.commit()
