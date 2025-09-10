@@ -53,7 +53,9 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_resume(*, session: Session, resume: ResumeSchema, db_user: UserPublic) -> Resume:
+def create_resume(
+    *, session: Session, resume: ResumeSchema, db_user: UserPublic
+) -> Resume:
     db_obj = Resume(title=resume.title, content=resume.content, user_id=db_user.id)
     session.add(db_obj)
     session.commit()
@@ -61,9 +63,21 @@ def create_resume(*, session: Session, resume: ResumeSchema, db_user: UserPublic
     return db_obj
 
 
-def delete_resume(*, session: Session, resume_id: uuid.UUID, db_user: UserPublic) -> None:
+def delete_resume(
+    *, session: Session, resume_id: uuid.UUID, db_user: UserPublic
+) -> None:
     stmt = delete(Resume).where(
         and_(Resume.id == resume_id, Resume.user_id == db_user.id)
     )
     session.execute(stmt)
     session.commit()
+
+
+def get_resume_by_id(
+    *, session: Session, resume_id: uuid.UUID, db_user: UserPublic
+) -> Resume | None:
+    stmt = select(Resume).where(
+        and_(Resume.id == resume_id, Resume.user_id == db_user.id)
+    )
+    resume = session.execute(stmt).scalars().first()
+    return resume
