@@ -25,13 +25,13 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     return db_obj
 
 
-def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
+def update_user(*, session: Session, user_id: uuid.UUID, user_in: UserUpdate) -> Any:
     user_data = user_in.model_dump(exclude_unset=True)
     if "password" in user_data:
         password = user_data.pop("password")  # Remove password from user_data
         hashed_password = get_password_hash(password)
         user_data["hashed_password"] = hashed_password
-    stmt = update(User).where(User.id == db_user.id).values(user_data)
+    stmt = update(User).where(User.id == user_id).values(user_data)
     session.execute(stmt)
     session.commit()
     session.refresh(db_user)
@@ -53,8 +53,8 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_resume(*, session: Session, resume: ResumeIn, db_user: UserPublic) -> Resume:
-    db_obj = Resume(title=resume.title, content=resume.content, user_id=db_user.id)
+def create_resume(*, session: Session, resume: ResumeIn, user_id: uuid.UUID) -> Resume:
+    db_obj = Resume(title=resume.title, content=resume.content, user_id=user_id)
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
@@ -62,21 +62,17 @@ def create_resume(*, session: Session, resume: ResumeIn, db_user: UserPublic) ->
 
 
 def delete_resume(
-    *, session: Session, resume_id: uuid.UUID, db_user: UserPublic
+    *, session: Session, resume_id: uuid.UUID, user_id: uuid.UUID
 ) -> None:
-    stmt = delete(Resume).where(
-        and_(Resume.id == resume_id, Resume.user_id == db_user.id)
-    )
+    stmt = delete(Resume).where(and_(Resume.id == resume_id, Resume.user_id == user_id))
     session.execute(stmt)
     session.commit()
 
 
 def get_resume_by_id(
-    *, session: Session, resume_id: uuid.UUID, db_user: UserPublic
+    *, session: Session, resume_id: uuid.UUID, user_id: uuid.UUID
 ) -> Resume | None:
-    stmt = select(Resume).where(
-        and_(Resume.id == resume_id, Resume.user_id == db_user.id)
-    )
+    stmt = select(Resume).where(and_(Resume.id == resume_id, Resume.user_id == user_id))
     resume = session.execute(stmt).scalars().first()
     return resume
 
@@ -85,12 +81,12 @@ def update_resume(
     *,
     session: Session,
     resume_id: uuid.UUID,
-    db_user: UserPublic,
+    user_id: uuid.UUID,
     resume_update: ResumeIn,
 ) -> Resume | None:
     stmt = (
         update(Resume)
-        .where(and_(Resume.id == resume_id, Resume.user_id == db_user.id))
+        .where(and_(Resume.id == resume_id, Resume.user_id == user_id))
         .values(resume_update.model_dump())
         .returning(Resume)
     )

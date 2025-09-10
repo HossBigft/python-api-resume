@@ -7,7 +7,7 @@ from app.db import crud
 from tests.utils.utils import random_lower_string
 from app.db.models import Resume, User
 from app.resume.resume_shemas import ResumeIn
-
+from app.schemas import UserPublic
 
 def test_create_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
@@ -18,7 +18,7 @@ def test_create_resume(db: Session, normal_user: User) -> None:
     crud.create_resume(
         session=db,
         resume=resume_schema,
-        db_user=normal_user,
+        user_id=normal_user.id,
     )
 
     resume_in_db: Resume = (
@@ -41,10 +41,10 @@ def test_delete_resume(db: Session, normal_user: User) -> None:
     resume = crud.create_resume(
         session=db,
         resume=resume_schema,
-        db_user=normal_user,
+        user_id=normal_user.id,
     )
 
-    crud.delete_resume(session=db, resume_id=resume.id, db_user=normal_user)
+    crud.delete_resume(session=db, resume_id=resume.id, user_id=normal_user.id)
     resume_in_db: Resume = (
         db.execute(select(Resume).where(Resume == resume)).scalars().first()
     )
@@ -61,12 +61,12 @@ def test_get_resume(db: Session, normal_user: User) -> None:
     created_resume: Resume | None = crud.create_resume(
         session=db,
         resume=resume_schema,
-        db_user=normal_user,
+        user_id=normal_user.id,
     )
     assert created_resume is not None
 
     received_in_db: Resume | None = crud.get_resume_by_id(
-        session=db, resume_id=created_resume.id, db_user=normal_user
+        session=db, resume_id=created_resume.id, user_id=normal_user.id
     )
 
     assert received_in_db is not None
@@ -78,11 +78,11 @@ def test_update_resume(db: Session, normal_user: User) -> None:
     resume_schema: ResumeIn = ResumeIn(
         title=resume_title, content=resume_content
     )
-
+    normal_user:UserPublic = UserPublic.model_validate(normal_user)
     created_resume: Resume | None = crud.create_resume(
         session=db,
         resume=resume_schema,
-        db_user=normal_user,
+        user_id=normal_user.id,
     )
     assert created_resume is not None
     new_title: str = random_lower_string()
@@ -91,7 +91,7 @@ def test_update_resume(db: Session, normal_user: User) -> None:
         title=new_title, content=new_content
     )
     updated_resume: Resume | None = crud.update_resume(
-        session=db, resume_id=created_resume.id, db_user=normal_user, resume_update=new_resume_data
+        session=db, resume_id=created_resume.id, user_id=normal_user.id, resume_update=new_resume_data
     )
 
     assert updated_resume is not None

@@ -15,7 +15,7 @@ router = APIRouter(tags=["resume"], prefix="/resume")
 async def add_resume(
     session: SessionDep, resume: ResumeIn, current_user: CurrentUser
 ) -> str:
-    create_resume(session=session, resume=resume, db_user=current_user)
+    create_resume(session=session, resume=resume, user_id=current_user.id)
     return "Resume added successfully"
 
 
@@ -23,7 +23,7 @@ async def add_resume(
 async def delete_resume_endpoint(
     session: SessionDep, resume_id: uuid.UUID, current_user: CurrentUser
 ) -> str:
-    delete_resume(session=session, resume_id=resume_id, db_user=current_user)
+    delete_resume(session=session, resume_id=resume_id, user_id=current_user.id)
     return "Resume deleted successfully"
 
 
@@ -32,7 +32,7 @@ async def get_resume_by_id_endpoint(
     session: SessionDep, resume_id: uuid.UUID, current_user: CurrentUser
 ) -> ResumeOut:
     resume: Resume | None = get_resume_by_id(
-        session=session, resume_id=resume_id, db_user=current_user
+        session=session, resume_id=resume_id, user_id=current_user.id
     )
     if not resume:
         raise HTTPException(status_code=404, detail="Resume was not found")
