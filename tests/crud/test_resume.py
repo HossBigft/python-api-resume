@@ -49,3 +49,25 @@ def test_delete_resume(db: Session, normal_user: User) -> None:
         db.execute(select(Resume).where(Resume == resume)).scalars().first()
     )
     assert resume_in_db is None
+
+
+def test_get_resume(db: Session, normal_user: User) -> None:
+    resume_title: str = random_lower_string()
+    resume_content: str = random_lower_string()
+    resume_schema: ResumeSchema = ResumeSchema(
+        title=resume_title, content=resume_content
+    )
+
+    created_resume: Resume | None = crud.create_resume(
+        session=db,
+        resume=resume_schema,
+        db_user=normal_user,
+    )
+    assert created_resume is not None
+
+    received_in_db: Resume | None = crud.get_resume_by_id(
+        session=db, resume_id=created_resume.id, db_user=normal_user
+    )
+
+    assert received_in_db is not None
+    assert created_resume.id==received_in_db.id

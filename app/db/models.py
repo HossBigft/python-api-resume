@@ -11,7 +11,7 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     is_active: Mapped[Boolean] = mapped_column(Boolean, default=True, nullable=False)
@@ -28,10 +28,10 @@ class User(Base):
 class Resume(Base):
     __tablename__ = "resume"
 
-    id: Mapped[UUID] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE")
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
