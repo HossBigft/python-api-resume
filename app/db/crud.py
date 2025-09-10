@@ -2,7 +2,7 @@ import uuid
 
 from typing import Any
 from sqlalchemy.orm import Session
-from sqlalchemy import update, select, delete, and_
+from sqlalchemy import update, select, delete, and_, values
 
 
 from app.core.security import get_password_hash, verify_password
@@ -53,9 +53,7 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_resume(
-    *, session: Session, resume: ResumeIn, db_user: UserPublic
-) -> Resume:
+def create_resume(*, session: Session, resume: ResumeIn, db_user: UserPublic) -> Resume:
     db_obj = Resume(title=resume.title, content=resume.content, user_id=db_user.id)
     session.add(db_obj)
     session.commit()
@@ -80,4 +78,22 @@ def get_resume_by_id(
         and_(Resume.id == resume_id, Resume.user_id == db_user.id)
     )
     resume = session.execute(stmt).scalars().first()
+    return resume
+
+
+def update_resume(
+    *,
+    session: Session,
+    resume_id: uuid.UUID,
+    db_user: UserPublic,
+    resume_update: ResumeIn,
+) -> Resume | None:
+    stmt = (
+        update(Resume)
+        .where(and_(Resume.id == resume_id, Resume.user_id == db_user.id))
+        .values(resume_update.model_dump())
+        .returning(Resume)
+    )
+    resume = session.execute(stmt).scalars().first()
+    session.commit()
     return resume

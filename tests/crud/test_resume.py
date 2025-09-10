@@ -71,3 +71,29 @@ def test_get_resume(db: Session, normal_user: User) -> None:
 
     assert received_in_db is not None
     assert created_resume.id==received_in_db.id
+
+def test_update_resume(db: Session, normal_user: User) -> None:
+    resume_title: str = random_lower_string()
+    resume_content: str = random_lower_string()
+    resume_schema: ResumeIn = ResumeIn(
+        title=resume_title, content=resume_content
+    )
+
+    created_resume: Resume | None = crud.create_resume(
+        session=db,
+        resume=resume_schema,
+        db_user=normal_user,
+    )
+    assert created_resume is not None
+    new_title: str = random_lower_string()
+    new_content: str = random_lower_string()
+    new_resume_data: ResumeIn = ResumeIn(
+        title=new_title, content=new_content
+    )
+    updated_resume: Resume | None = crud.update_resume(
+        session=db, resume_id=created_resume.id, db_user=normal_user, resume_update=new_resume_data
+    )
+
+    assert updated_resume is not None
+    assert updated_resume.title==new_resume_data.title
+    assert updated_resume.content==new_resume_data.content
