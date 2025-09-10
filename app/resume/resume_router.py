@@ -1,18 +1,19 @@
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 
 from app.core.dependencies import CurrentUser, SessionDep
-from app.resume.resume_shemas import ResumeSchema
-from app.db.crud import create_resume, delete_resume
+from app.resume.resume_shemas import ResumeIn, ResumeOut
+from app.db.crud import create_resume, delete_resume, get_resume_by_id
+from app.db.models import Resume
 
 router = APIRouter(tags=["resume"], prefix="/resume")
 
 
 @router.post("/")
 async def add_resume(
-    session: SessionDep, resume: ResumeSchema, current_user: CurrentUser
+    session: SessionDep, resume: ResumeIn, current_user: CurrentUser
 ) -> str:
     create_resume(session=session, resume=resume, db_user=current_user)
     return "Resume added successfully"
@@ -24,3 +25,15 @@ async def delete_resume_endpoint(
 ) -> str:
     delete_resume(session=session, resume_id=resume_id, db_user=current_user)
     return "Resume deleted successfully"
+
+
+@router.get("/{resume_id}")
+async def get_resume_by_id_endpoint(
+    session: SessionDep, resume_id: uuid.UUID, current_user: CurrentUser
+) -> ResumeOut:
+    resume: Resume | None = get_resume_by_id(
+        session=session, resume_id=resume_id, db_user=current_user
+    )
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume was not found")
+    return ResumeOut.model_validate(resume)

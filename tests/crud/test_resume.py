@@ -6,13 +6,13 @@ from app.db import crud
 
 from tests.utils.utils import random_lower_string
 from app.db.models import Resume, User
-from app.resume.resume_shemas import ResumeSchema
+from app.resume.resume_shemas import ResumeIn
 
 
 def test_create_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeSchema = ResumeSchema(
+    resume_schema: ResumeIn = ResumeIn(
         title=resume_title, content=resume_content
     )
     crud.create_resume(
@@ -34,7 +34,7 @@ def test_create_resume(db: Session, normal_user: User) -> None:
 def test_delete_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeSchema = ResumeSchema(
+    resume_schema: ResumeIn = ResumeIn(
         title=resume_title, content=resume_content
     )
 
@@ -54,7 +54,7 @@ def test_delete_resume(db: Session, normal_user: User) -> None:
 def test_get_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeSchema = ResumeSchema(
+    resume_schema: ResumeIn = ResumeIn(
         title=resume_title, content=resume_content
     )
 

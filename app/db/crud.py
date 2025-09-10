@@ -8,7 +8,7 @@ from sqlalchemy import update, select, delete, and_
 from app.core.security import get_password_hash, verify_password
 from app.schemas import UserCreate, UserUpdate, UserPublic
 from app.db.models import User, Resume
-from app.resume.resume_shemas import ResumeSchema
+from app.resume.resume_shemas import ResumeIn
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -54,7 +54,7 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
 
 
 def create_resume(
-    *, session: Session, resume: ResumeSchema, db_user: UserPublic
+    *, session: Session, resume: ResumeIn, db_user: UserPublic
 ) -> Resume:
     db_obj = Resume(title=resume.title, content=resume.content, user_id=db_user.id)
     session.add(db_obj)

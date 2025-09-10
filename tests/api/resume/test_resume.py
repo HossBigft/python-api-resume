@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from app.resume.resume_shemas import ResumeSchema
+from app.resume.resume_shemas import ResumeIn, ResumeOut
 from tests.utils.utils import random_lower_string
 from app.db.models import Resume, User
 
@@ -16,7 +16,7 @@ async def test_create_resume(
     db: Session,
     normal_user: User,
 ) -> None:
-    resume = ResumeSchema(title=random_lower_string(), content=random_lower_string())
+    resume = ResumeIn(title=random_lower_string(), content=random_lower_string())
     await client.post(
         "/resume/", headers=normal_user_token_headers, json=resume.model_dump()
     )
@@ -37,9 +37,7 @@ async def test_delete_resume(
     db: Session,
     normal_user: User,
 ) -> None:
-    resume_data = ResumeSchema(
-        title=random_lower_string(), content=random_lower_string()
-    )
+    resume_data = ResumeIn(title=random_lower_string(), content=random_lower_string())
     await client.post(
         "/resume/", headers=normal_user_token_headers, json=resume_data.model_dump()
     )
@@ -60,3 +58,32 @@ async def test_delete_resume(
     )
     assert r.status_code == 200
     assert resume_after is None
+
+
+@pytest.mark.asyncio
+async def test_get_resume(
+    client: AsyncClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
+    normal_user: User,
+) -> None:
+    resume_data = ResumeIn(title=random_lower_string(), content=random_lower_string())
+    await client.post(
+        "/resume/", headers=normal_user_token_headers, json=resume_data.model_dump()
+    )
+    resume_via_crud: Resume | None = (
+        db.execute(select(Resume).where(Resume.user_id == normal_user.id))
+        .scalars()
+        .first()
+    )
+    assert resume_via_crud is not None
+
+    r = await client.get(
+        f"/resume/{resume_via_crud.id}", headers=normal_user_token_headers
+    )
+    print(r.json())
+    resume_via_api: ResumeOut = ResumeOut.model_validate(r.json())
+    assert r.status_code == 200
+    assert resume_via_crud.id == resume_via_api.id
+    assert resume_via_crud.title == resume_via_api.title
+    assert resume_via_crud.content == resume_via_api.content
