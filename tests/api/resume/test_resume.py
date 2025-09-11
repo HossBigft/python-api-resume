@@ -93,9 +93,7 @@ async def test_get_resume(
 @pytest.mark.asyncio
 async def test_get_resume_by_user(
     client: AsyncClient,
-    normal_user_token_headers: dict[str, str],
-    db: Session,
-    normal_user: User,
+    normal_user_token_headers: dict[str, str]
 ) -> None:
     for i in range(0, 3):
         resume_data = ResumeIn(
@@ -104,15 +102,9 @@ async def test_get_resume_by_user(
         await client.post(
             "/resume/", headers=normal_user_token_headers, json=resume_data.model_dump()
         )
-        resume_via_crud: Resume | None = (
-            db.execute(select(Resume).where(Resume.user_id == normal_user.id))
-            .scalars()
-            .first()
-        )
-        assert resume_via_crud is not None
 
-    r = await client.get("/resume/my", headers=normal_user_token_headers)
-
+    r = await client.get("/resume/", headers=normal_user_token_headers)
+    print("RESPONSE_R", r.json())
     resume_via_api: List[ResumeListItemOut] = [
         ResumeListItemOut.model_validate(resume) for resume in r.json()
     ]

@@ -44,7 +44,7 @@ async def get_resume_by_id_endpoint(
     return ResumeOut.model_validate(resume)
 
 
-@router.get("/my")
+@router.get("/")
 async def get_my_resume(
     session: SessionDep, current_user: CurrentUser
 ) -> List[ResumeListItemOut]:
