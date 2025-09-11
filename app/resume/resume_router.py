@@ -1,11 +1,16 @@
 import uuid
 
 from fastapi import APIRouter, HTTPException
-
+from typing import Sequence, List
 
 from app.core.dependencies import CurrentUser, SessionDep
-from app.resume.resume_shemas import ResumeIn, ResumeOut
-from app.db.crud import create_resume, delete_resume, get_resume_by_id
+from app.resume.resume_shemas import ResumeIn, ResumeOut, ResumeListItemOut
+from app.db.crud import (
+    create_resume,
+    delete_resume,
+    get_resume_by_id,
+    get_resume_list_by_user,
+)
 from app.db.models import Resume
 
 router = APIRouter(tags=["resume"], prefix="/resume")
@@ -37,3 +42,15 @@ async def get_resume_by_id_endpoint(
     if not resume:
         raise HTTPException(status_code=404, detail="Resume was not found")
     return ResumeOut.model_validate(resume)
+
+
+@router.get("/my")
+async def get_my_resume(
+    session: SessionDep, current_user: CurrentUser
+) -> List[ResumeListItemOut]:
+    resumes: Sequence[Resume] | None = get_resume_list_by_user(
+        session=session, user_id=current_user.id
+    )
+    if not resumes:
+        raise HTTPException(status_code=404, detail="There are no resume yet")
+    return [ResumeListItemOut.model_validate(resume) for resume in resumes]
