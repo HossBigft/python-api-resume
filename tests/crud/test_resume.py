@@ -7,25 +7,24 @@ from app.db import crud
 from tests.utils.utils import random_lower_string
 from app.db.models import Resume, User
 from app.resume.resume_shemas import ResumeIn
-from app.schemas import UserPublic
+
 
 def test_create_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeIn = ResumeIn(
-        title=resume_title, content=resume_content
-    )
+    resume_schema: ResumeIn = ResumeIn(title=resume_title, content=resume_content)
     crud.create_resume(
         session=db,
         resume=resume_schema,
         user_id=normal_user.id,
     )
 
-    resume_in_db: Resume = (
+    resume_in_db: Resume | None = (
         db.execute(select(Resume).where(Resume.user_id == normal_user.id))
         .scalars()
         .first()
     )
+    assert resume_in_db is not None
     assert normal_user.id == resume_in_db.user_id
     assert resume_in_db.title == resume_title
     assert resume_in_db.content == resume_content
@@ -34,9 +33,7 @@ def test_create_resume(db: Session, normal_user: User) -> None:
 def test_delete_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeIn = ResumeIn(
-        title=resume_title, content=resume_content
-    )
+    resume_schema: ResumeIn = ResumeIn(title=resume_title, content=resume_content)
 
     resume = crud.create_resume(
         session=db,
@@ -45,8 +42,8 @@ def test_delete_resume(db: Session, normal_user: User) -> None:
     )
 
     crud.delete_resume(session=db, resume_id=resume.id, user_id=normal_user.id)
-    resume_in_db: Resume = (
-        db.execute(select(Resume).where(Resume == resume)).scalars().first()
+    resume_in_db: Resume | None = (
+        db.execute(select(Resume).where(Resume.id == resume.id)).scalars().first()
     )
     assert resume_in_db is None
 
@@ -54,9 +51,7 @@ def test_delete_resume(db: Session, normal_user: User) -> None:
 def test_get_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeIn = ResumeIn(
-        title=resume_title, content=resume_content
-    )
+    resume_schema: ResumeIn = ResumeIn(title=resume_title, content=resume_content)
 
     created_resume: Resume | None = crud.create_resume(
         session=db,
@@ -70,15 +65,13 @@ def test_get_resume(db: Session, normal_user: User) -> None:
     )
 
     assert received_in_db is not None
-    assert created_resume.id==received_in_db.id
+    assert created_resume.id == received_in_db.id
+
 
 def test_update_resume(db: Session, normal_user: User) -> None:
     resume_title: str = random_lower_string()
     resume_content: str = random_lower_string()
-    resume_schema: ResumeIn = ResumeIn(
-        title=resume_title, content=resume_content
-    )
-    normal_user:UserPublic = UserPublic.model_validate(normal_user)
+    resume_schema: ResumeIn = ResumeIn(title=resume_title, content=resume_content)
     created_resume: Resume | None = crud.create_resume(
         session=db,
         resume=resume_schema,
@@ -87,13 +80,14 @@ def test_update_resume(db: Session, normal_user: User) -> None:
     assert created_resume is not None
     new_title: str = random_lower_string()
     new_content: str = random_lower_string()
-    new_resume_data: ResumeIn = ResumeIn(
-        title=new_title, content=new_content
-    )
+    new_resume_data: ResumeIn = ResumeIn(title=new_title, content=new_content)
     updated_resume: Resume | None = crud.update_resume(
-        session=db, resume_id=created_resume.id, user_id=normal_user.id, resume_update=new_resume_data
+        session=db,
+        resume_id=created_resume.id,
+        user_id=normal_user.id,
+        resume_update=new_resume_data,
     )
 
     assert updated_resume is not None
-    assert updated_resume.title==new_resume_data.title
-    assert updated_resume.content==new_resume_data.content
+    assert updated_resume.title == new_resume_data.title
+    assert updated_resume.content == new_resume_data.content
