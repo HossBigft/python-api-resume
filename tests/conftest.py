@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.schemas import UserCreate
-from app.db.models import User
+from app.db.models import User, Resume
 from app.db.crud import create_user
 from tests.utils.utils import (
     get_superuser_token_headers,
@@ -78,3 +78,10 @@ async def normal_user_token_headers(client: AsyncClient, db: Session) -> dict[st
     return await user_authentication_headers(
         client=client, email=normal_user.email, password=normal_user.password
     )
+
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def clean_resumes(db: Session):
+    yield
+    db.execute(delete(Resume))
+    db.commit()
