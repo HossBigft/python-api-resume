@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from typing import Sequence
 
 from app.db import crud
 
@@ -91,3 +92,21 @@ def test_update_resume(db: Session, normal_user: User) -> None:
     assert updated_resume is not None
     assert updated_resume.title == new_resume_data.title
     assert updated_resume.content == new_resume_data.content
+
+
+def test_get_user_resume(db: Session, normal_user: User) -> None:
+    for i in range(0, 3):
+        resume_title: str = random_lower_string()
+        resume_content: str = random_lower_string()
+        resume_schema: ResumeIn = ResumeIn(title=resume_title, content=resume_content)
+        crud.create_resume(
+            session=db,
+            resume=resume_schema,
+            user_id=normal_user.id,
+        )
+    list_of_resume: Sequence[Resume] | None = crud.get_resume_list_by_user(
+        session=db, user_id=normal_user.id
+    )
+
+    assert list_of_resume is not None
+    assert len(list_of_resume) == 3

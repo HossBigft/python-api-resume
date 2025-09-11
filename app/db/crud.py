@@ -1,12 +1,12 @@
 import uuid
 
-from typing import Any
+from typing import Any, Sequence
 from sqlalchemy.orm import Session
-from sqlalchemy import update, select, delete, and_, values
+from sqlalchemy import update, select, delete, and_
 
 
 from app.core.security import get_password_hash, verify_password
-from app.schemas import UserCreate, UserUpdate, UserPublic
+from app.schemas import UserCreate, UserUpdate
 from app.db.models import User, Resume
 from app.resume.resume_shemas import ResumeIn
 
@@ -93,3 +93,14 @@ def update_resume(
     resume = session.execute(stmt).scalars().first()
     session.commit()
     return resume
+
+
+def get_resume_list_by_user(
+    *,
+    session: Session,
+    user_id: uuid.UUID,
+) -> Sequence[Resume] | None:
+    stmt = select(Resume).where(Resume.user_id == user_id)
+    resumes = session.execute(stmt).scalars().all()
+
+    return resumes
