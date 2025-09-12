@@ -52,11 +52,7 @@ async def superuser_token_headers(client: AsyncClient) -> dict[str, str]:
 
 @pytest_asyncio.fixture(scope="module")
 async def normal_user_credentials(db: Session) -> UserCreate:
-    user: User = (
-        db.execute(select(User).where(User.is_superuser.is_(False))).scalars().first()
-    )
-    if not user:
-        user = create_random_user(db)
+    user = create_random_user(db)
     return user
 
 
@@ -73,10 +69,11 @@ async def normal_user(db: Session, normal_user_credentials: UserCreate) -> User:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def normal_user_token_headers(client: AsyncClient, db: Session) -> dict[str, str]:
-    normal_user: UserCreate = create_random_user(db)
+async def normal_user_token_headers(
+    client: AsyncClient, db: Session, normal_user_credentials: User
+) -> dict[str, str]:
     return await user_authentication_headers(
-        client=client, email=normal_user.email, password=normal_user.password
+        client=client, email=normal_user_credentials.email, password=normal_user_credentials.password
     )
 
 
