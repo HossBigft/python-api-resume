@@ -54,3 +54,16 @@ async def get_my_resume(
     if not resumes:
         raise HTTPException(status_code=404, detail="There are no resume yet")
     return [ResumeListItemOut.model_validate(resume) for resume in resumes]
+
+
+@router.get("/{resume_id}/improve")
+async def get_improved_resume(
+    session: SessionDep, resume_id: uuid.UUID, current_user: CurrentUser
+) -> ResumeOut:
+    resume: Resume | None = get_resume_by_id(
+        session=session, resume_id=resume_id, user_id=current_user.id
+    )
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume was not found")
+    resume.content = resume.content + " [Improved]"
+    return ResumeOut.model_validate(resume)
