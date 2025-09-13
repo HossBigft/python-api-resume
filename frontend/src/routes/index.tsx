@@ -1,4 +1,3 @@
-// src/routes/index.tsx
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "./__root";
 import { useEffect } from "react";
