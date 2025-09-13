@@ -1,40 +1,65 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAuth } from './__root'
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const auth = useAuth()
-  const router = useRouter()
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (username && password) {
-      auth.login()
+    setError(null)
+
+    try {
+      const formData = new URLSearchParams()
+      formData.append('username', username)
+      formData.append('password', password)
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/login/access-token`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
+
+      if (!res.ok) throw new Error('Invalid credentials')
+
+      const data = await res.json()
+      localStorage.setItem('authToken', data.access_token)
+
       router.navigate({ to: '/' })
+    } catch (err: any) {
+      setError(err.message)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div style={{ padding: 20 }}>
       <h1>Login</h1>
-      <input
-        placeholder="username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Login</button>
-    </form>
-  )
+      <form onSubmit={handleSubmit}>
+        <div>
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+          />
+        </div>
+        <div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </div>
+  );
 }
