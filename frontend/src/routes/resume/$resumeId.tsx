@@ -12,8 +12,11 @@ function ResumePage() {
   const [resume, setResume] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  console.log("resumeId", resumeId);
+  const [improved, setImproved] = useState<null | {
+    id: string;
+    title: string;
+    content: string;
+  }>(null);
 
   useEffect(() => {
     if (!resumeId) return;
@@ -50,6 +53,30 @@ function ResumePage() {
   if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!resume) return null;
 
+  const handleImprove = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/${resumeId}/improve`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Failed: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setImproved(data);
+    } catch (err) {
+      console.error("Improve error:", err);
+      setImproved(null);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div style={{ padding: 20 }}>
       <h1>{resume.title}</h1>
@@ -57,6 +84,16 @@ function ResumePage() {
       <button onClick={() => router.navigate({ to: "/resume/" })}>
         Back to list
       </button>
+      <button onClick={handleImprove} disabled={loading}>
+        {loading ? "Improving..." : "Improve"}
+      </button>
+
+      {improved && (
+        <div className="mt-4 border p-4 rounded bg-gray-50">
+          <h2 className="font-bold text-lg">{improved.title}</h2>
+          <p className="whitespace-pre-line">{improved.content}</p>
+        </div>
+      )}
     </div>
   );
 }
