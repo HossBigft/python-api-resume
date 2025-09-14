@@ -1,53 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useAuth } from "../__root";
-import { useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/resume/$resumeId")({
-  component: ResumeDetailPage,
+  component: ResumePage,
 });
 
-type Resume = {
-  id: string;
-  title: string;
-  content: string;
-};
-
-function ResumeDetailPage() {
-  const auth = useAuth();
+function ResumePage() {
   const router = useRouter();
-  const [resume, setResume] = useState<Resume | null>(null);
+  const { resumeId } = useParams({ from: "/resume/$resumeId" });
+
+  const [resume, setResume] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const resumeId = router.params.resumeId as string;
+  console.log("resumeId", resumeId);
 
   useEffect(() => {
-    if (!auth.isLoggedIn) {
-      router.navigate({ to: "/login" });
-      return;
-    }
+    if (!resumeId) return;
 
     const fetchResume = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) throw new Error("No token found");
-
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/${resumeId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (!res.ok) {
-          if (res.status === 404) {
-            setResume(null);
-            return;
-          } else {
-            throw new Error("Failed to fetch resume");
-          }
+          setError(
+            res.status === 404 ? "Resume not found" : "Failed to fetch resume"
+          );
+          return;
         }
 
-        const data: Resume = await res.json();
+        const data = await res.json();
         setResume(data);
       } catch (err: any) {
         setError(err.message);
@@ -57,16 +43,20 @@ function ResumeDetailPage() {
     };
 
     fetchResume();
-  }, [auth.isLoggedIn, resumeId, router]);
+  }, [resumeId]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!resume) return <p>Resume not found.</p>;
+  if (!resumeId) return <div>Waiting for resume id…</div>;
+  if (loading) return <div>Loading resume...</div>;
+  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  if (!resume) return null;
 
   return (
     <div style={{ padding: 20 }}>
       <h1>{resume.title}</h1>
       <p>{resume.content}</p>
+      <button onClick={() => router.navigate({ to: "/resume/" })}>
+        Back to list
+      </button>
     </div>
   );
 }

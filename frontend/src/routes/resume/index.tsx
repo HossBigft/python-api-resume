@@ -30,12 +30,9 @@ function ResumeListPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) {
         if (res.status === 404) {
           setResumes([]);
@@ -66,17 +63,14 @@ function ResumeListPage() {
     setAdding(true);
     setAddError(null);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title: newTitle, content: newContent }),
-        }
-      );
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: newTitle, content: newContent }),
+      });
       if (!res.ok) throw new Error("Failed to add resume");
       setNewTitle("");
       setNewContent("");
@@ -100,7 +94,12 @@ function ResumeListPage() {
       ) : (
         <ul>
           {resumes.map((r) => (
-            <li key={r.id}>{r.title}</li>
+            <li key={r.id} style={{ marginBottom: 8 }}>
+              {r.title}{" "}
+              <button onClick={() => router.navigate({ to: `/resume/${r.id}` })}>
+                View
+              </button>
+            </li>
           ))}
         </ul>
       )}
