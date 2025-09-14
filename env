@@ -1,19 +1,13 @@
-# Domain
-# This would be set to the production domain with an env var on deployment
-# used by Traefik to transmit traffic and aqcuire TLS certificates
-DOMAIN=localhost
-# To test the local Traefik config
-# DOMAIN=localhost.tiangolo.com
-
+FRONTEND_HOST=http://localhost:5173
 
 # Used by the frontend for api calls
-BACKEND_HOST=http://localhost:8000
+BACKEND_HOST=localhost:8000
 
 #local for debugging
 # Environment: local, staging, production
 ENVIRONMENT=local
 
-PROJECT_NAME="project-name"
+PROJECT_NAME="resume-api"
 
 # Backend, also always add https://FRONTEND_SUBDOMAIN.DOMAIN to this list
 BACKEND_CORS_ORIGINS="http://localhost,http://localhost:5173,https://localhost,https://localhost:5173,http://localhost.tiangolo.com"

@@ -34,7 +34,7 @@ services:
 
   prestart:
     build:
-      context: .
+      context: ./backend
     networks:
       - default
     depends_on:
@@ -56,7 +56,7 @@ services:
     networks:
       - default
     build:
-      context: .
+      context: ./backend
     env_file:
       - .env
     depends_on:
@@ -83,6 +83,18 @@ services:
       timeout: 5s
       retries: 5
 
+  frontend:
+      restart: always
+      env_file:
+        - .env
+      networks:
+        - default
+      ports:
+      - "5173:80"
+      build:
+        context: ./frontend
+        args:
+          - VITE_API_URL=http://${BACKEND_HOST?Variable not set}
 
 volumes:
   app-db-data:

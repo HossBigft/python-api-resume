@@ -27,7 +27,7 @@ function LoginPage() {
       formData.append("password", password);
 
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/login/access-token`,
+        `${import.meta.env.VITE_API_URL}/api/v1/login/access-token`,
         {
           method: "POST",
           body: formData,

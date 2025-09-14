@@ -25,7 +25,7 @@ function ResumePage() {
       try {
         const token = localStorage.getItem("authToken");
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/${resumeId}`,
+          `${import.meta.env.VITE_API_URL}/api/v1/resume/${resumeId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -58,7 +58,7 @@ function ResumePage() {
       setLoading(true);
       const token = localStorage.getItem("authToken");
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/${resumeId}/improve`,
+        `${import.meta.env.VITE_API_URL}/api/v1/resume/${resumeId}/improve`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -81,7 +81,7 @@ function ResumePage() {
     <div style={{ padding: 20 }}>
       <h1>{resume.title}</h1>
       <p>{resume.content}</p>
-      <button onClick={() => router.navigate({ to: "/resume/" })}>
+      <button onClick={() => router.navigate({ to: "/resume" })}>
         Back to list
       </button>
       <button onClick={handleImprove} disabled={loading}>

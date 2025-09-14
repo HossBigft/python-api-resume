@@ -30,7 +30,7 @@ function ResumeListPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/resume/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -63,7 +63,7 @@ function ResumeListPage() {
     setAdding(true);
     setAddError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/resume/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/resume/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
