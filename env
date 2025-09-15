@@ -1,11 +1,9 @@
-FRONTEND_HOST=http://localhost:5173
+DOMAIN=localhost
 
+FRONTEND_HOST=http://localhost:5173
 # Used by the frontend for api calls
 BACKEND_HOST=localhost:8000
 
-#local for debugging
-# Environment: local, staging, production
-ENVIRONMENT=local
 
 PROJECT_NAME="resume-api"
 
