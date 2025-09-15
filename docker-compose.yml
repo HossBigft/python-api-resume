@@ -126,7 +126,7 @@ services:
       build:
         context: ./frontend
         args:
-          - VITE_API_URL=http://${BACKEND_HOST?Variable not set}
+          - VITE_API_URL=${BACKEND_HOST?Variable not set}
       labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
